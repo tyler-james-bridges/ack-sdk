@@ -19,6 +19,7 @@
 export { ACK } from './client.js'
 export { getChainConfig, getSupportedChains, CHAIN_CONFIGS } from './chains.js'
 export { CONTRACT_ADDRESSES } from './contracts.js'
+export { BASE_BUILDER_CODE } from './builder-code.js'
 
 // Export all types
 export type {

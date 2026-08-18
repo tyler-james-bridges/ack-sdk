@@ -6,11 +6,13 @@ import {
   type PublicClient,
   type Address,
   type Hash,
+  type Hex,
   keccak256,
   toHex,
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { getChainConfig } from './chains.js'
+import { BASE_DATA_SUFFIX } from './builder-code.js'
 import { CONTRACT_ADDRESSES, IDENTITY_REGISTRY_ABI, REPUTATION_REGISTRY_ABI } from './contracts.js'
 import type {
   ACKConfig,
@@ -32,6 +34,7 @@ export class ACK {
   private readonly walletClient?: WalletClient
   private readonly config: ACKConfig
   private readonly apiKey?: string
+  private readonly dataSuffix?: Hex
 
   private constructor(
     publicClient: PublicClient,
@@ -42,6 +45,7 @@ export class ACK {
     this.walletClient = walletClient
     this.config = config
     this.apiKey = config.apiKey || process.env.EIGHTOOSCAN_API_KEY
+    this.dataSuffix = config.chain === 'base' ? BASE_DATA_SUFFIX : undefined
   }
 
   /**
@@ -97,7 +101,8 @@ export class ACK {
     const walletClient = createWalletClient({
       account,
       chain,
-      transport: http()
+      transport: http(),
+      dataSuffix: chainConfig.id === 8453 ? BASE_DATA_SUFFIX : undefined,
     })
 
     return new ACK(publicClient, walletClient, config)
@@ -320,7 +325,8 @@ export class ACK {
       functionName: 'register',
       args: [this.walletClient.account!.address, metadataURI],
       account: this.walletClient.account!,
-      chain: this.walletClient.chain
+      chain: this.walletClient.chain,
+      dataSuffix: this.dataSuffix,
     })
 
     const receipt = await this.publicClient.waitForTransactionReceipt({ hash })
@@ -381,7 +387,8 @@ export class ACK {
         feedbackHash
       ],
       account: this.walletClient.account!,
-      chain: this.walletClient.chain
+      chain: this.walletClient.chain,
+      dataSuffix: this.dataSuffix,
     })
 
     const receipt = await this.publicClient.waitForTransactionReceipt({ hash })
